@@ -13,16 +13,52 @@ y: 420,
 width: 30,
 height: 30,
 speed: 4,
-iq: 5
+iq: 0
 };
 
 let blocks = [];
 
 let score = 0;
-let facing = 1; // 1 = kanan, -1 = kiri
+let facing = 1;
 let gameOver = false;
-let activeGoal = goalsList[Math.floor(Math.random()*goalsList.length)];
 
+/* ================= GOAL SYSTEM ================= */
+
+let goal = 0;
+let currentSum = 0;
+let goalTimer = 10;
+
+function newGoal(){
+
+goal = Math.floor(Math.random() * 21) - 10;
+currentSum = 0;
+goalTimer = 10;
+
+player.iq = 0;
+
+document.getElementById("goal").textContent = goal;
+document.getElementById("goalText").textContent = goal;
+document.getElementById("timer").textContent = goalTimer;
+document.getElementById("iq").textContent = player.iq;
+
+}
+
+setInterval(()=>{
+
+if(gameOver) return;
+
+goalTimer--;
+
+if(goalTimer <= 0){
+goalTimer = 0;
+gameOver = true;
+}
+
+document.getElementById("timer").textContent = goalTimer;
+
+},1000);
+
+newGoal();
 
 /* ================= SPAWN BLOCK ================= */
 
@@ -36,7 +72,7 @@ y: -30,
 width: 28,
 height: 28,
 op: op,
-speed: 0.9 + score * 0.015,
+speed: 2 + score * 0.0,
 hit:false
 });
 
@@ -46,53 +82,38 @@ hit:false
 
 function applyOperation(op){
 
-let val = player.iq;
+let val = 0;
 
-if(op === "+1") val += 1;
-if(op === "+2") val += 2;
-if(op === "-1") val -= 1;
-if(op === "-2") val -= 2;
+if(op === "+1") val = 1;
+if(op === "+2") val = 2;
+if(op === "+3") val = 3;
+if(op === "-1") val = -1;
+if(op === "-2") val = -2;
+if(op === "-3") val = -3;
 
-player.iq = val;
+currentSum += val;
 
-document.getElementById("iq").textContent = val;
+player.iq = currentSum;
 
-checkGoals();
-}
+document.getElementById("iq").textContent = currentSum;
 
-/* ================= GOAL CHECK ================= */
+/* check goal */
 
-function checkGoals(){
+if(currentSum === goal){
 
-if(!activeGoal.check(player.iq)){
-gameOver = true;
-}
+score++;
+document.getElementById("score").textContent = score;
 
-}
-
-function updateGoalUI(){
-
-document.getElementById("rules").textContent =
-"Goal: " + activeGoal.text;
+newGoal();
 
 }
+}
 
-setInterval(()=>{
-
-if(gameOver) return;
-
-activeGoal = goalsList[Math.floor(Math.random()*goalsList.length)];
-
-updateGoalUI();
-
-},8000);
-
-
-updateGoalUI();
 /* ================= PLAYER CONTROL ================= */
 
 let moveLeft = false;
 let moveRight = false;
+let fastDrop = false;
 
 let lastDirection = 1;
 let dashCooldown = false;
@@ -142,7 +163,13 @@ player.x = canvas.width - player.width;
 /* block movement */
 
 blocks.forEach(block=>{
+
+if(fastDrop){
+block.y += block.speed * 4;
+}else{
 block.y += block.speed;
+}
+
 });
 
 blocks = blocks.filter(b=>b.y < canvas.height+50);
@@ -162,7 +189,7 @@ player.y + player.height > block.y
 
 applyOperation(block.op);
 
-blocks.splice(i,1); // hapus block
+blocks.splice(i,1);
 
 }
 
@@ -253,6 +280,7 @@ document.addEventListener("keydown",e=>{
 
 if(e.key === "ArrowLeft") moveLeft = true;
 if(e.key === "ArrowRight") moveRight = true;
+if(e.key === "ArrowDown") fastDrop = true;
 
 if(e.code === "Space") dash();
 
@@ -262,6 +290,7 @@ document.addEventListener("keyup",e=>{
 
 if(e.key === "ArrowLeft") moveLeft = false;
 if(e.key === "ArrowRight") moveRight = false;
+if(e.key === "ArrowDown") fastDrop = false;
 
 });
 
@@ -297,16 +326,56 @@ lastTap = now;
 
 });
 
+canvas.addEventListener("touchstart", () => {
+fastDrop = true;
+});
+
+canvas.addEventListener("touchend", () => {
+fastDrop = false;
+});
+
 /* ================= SCORE / SPAWN ================= */
 
 setInterval(()=>{
 
 if(gameOver) return;
 
-score++;
-
-document.getElementById("score").textContent = score;
-
 spawnBlock();
 
-},700);
+},350);
+
+/* ================= MOBILE BUTTON CONTROLS ================= */
+
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
+
+leftBtn.addEventListener("touchstart", () => {
+moveLeft = true;
+});
+
+leftBtn.addEventListener("touchend", () => {
+moveLeft = false;
+});
+
+rightBtn.addEventListener("touchstart", () => {
+moveRight = true;
+});
+
+rightBtn.addEventListener("touchend", () => {
+moveRight = false;
+});
+
+/* optional mouse */
+
+leftBtn.addEventListener("mousedown", () => moveLeft = true);
+leftBtn.addEventListener("mouseup", () => moveLeft = false);
+
+rightBtn.addEventListener("mousedown", () => moveRight = true);
+rightBtn.addEventListener("mouseup", () => moveRight = false);
+
+/* bug ketika tekan down tidak scroll bawah*/
+window.addEventListener("keydown", function(e) {
+if(["ArrowDown","ArrowUp","ArrowLeft","ArrowRight","Space"].includes(e.code)){
+e.preventDefault();
+}
+}, false);

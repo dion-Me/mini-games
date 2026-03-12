@@ -1,46 +1,48 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <title>Math Dodge</title>
 
 <link rel="stylesheet" href="style.css">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 </head>
 
 <body>
 
-	<header class="site-header">
-		<h1>Title</h1>
-		<a href="../index.html" class="back-button">← Back to Games</a>
-	</header>
+<header class="site-header">
+<h1>IQ Dodge</h1>
+<a href="../index.html" class="back-button">← Back</a>
+</header>
 
-	<main class="game-container">
-		<div>
-		</div>
-		
-		<div class="game-box">
+<main class="game-container">
 
-		<div id="hud">
+<div class="game-box">
 
-			<p>IQ: <span id="iq">5</span></p>
-			<p>Score: <span id="score">0</span></p>
-			<p id="rules"></p>
+<div id="hud">
 
-		</div>
+<p>IQ: <span id="iq">5</span></p>
+<p>Goal: <span id="goal">0</span></p>
+<p>Score: <span id="score">0</span></p>
+<p>Time: <span id="timer">10</span>s</p>
 
-		<canvas id="gameCanvas" ></canvas>
+<p id="rules" >Pick numbers that add up to the goal! -> <span id="goalText"></span> </p>
+</div>
 
-		</div>
-		
-		<div>
-		</div>
-	</main>
+<canvas id="gameCanvas"></canvas>
+
+<div class="mobile-controls">
+<button id="leftBtn">◀</button>
+<button id="rightBtn">▶</button>
+</div>
+
+</div>
+
+</main>
 
 <script src="game-data.js"></script>
 <script src="script.js"></script>
