@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess The Number</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<header class="site-header">
+    <h1>Guess The Number</h1>
+    <a href="../index.html" class="back-button">← Back to Games</a>
+</header>
+
+<main class="game-container">
+
+<div class="game-box">
+
+    <p>Guess a number between 1 and 100</p>
+
+    <input type="number" id="guess" placeholder="Enter number">
+
+    <button onclick="cekTebakan()">Guess</button>
+
+    <p id="hasil"></p>
+	<p id="counter">Attempts: 0</p>
+
+</div>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>
