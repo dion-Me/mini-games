@@ -10,14 +10,14 @@ People love playing easy to access games, this web page built so people can enjo
 Guessing a random number between 1 - 100
 
 <p align="center">
-  <img src="img/tebakangka.png" width="600">
+  <img src="img/tebakangka.png" width="400">
 </p>
 
 2. Math Dodge
 Falling block and math combination
 
 <p align="center">
-  <img src="img/mathdodge.png" width="600">
+  <img src="img/mathdodge.png" width="400">
 </p>
 
 ## Project Structure

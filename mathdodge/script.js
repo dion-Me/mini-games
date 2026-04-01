@@ -16,6 +16,28 @@ speed: 4,
 iq: 0
 };
 
+let goalFlash = {
+active: false,
+alpha: 0,
+scale: 1.5
+};
+
+const sfx = {
+pickup: new Audio("pickup.wav"),
+goal: new Audio("goal.wav"),
+dash: new Audio("dash.wav")
+};
+
+sfx.pickup.volume = 0.4;
+sfx.goal.volume = 0.5;
+sfx.dash.volume = 0.4;
+
+function playSound(sound){
+if(!audioUnlocked) return;
+sound.currentTime = 0;
+sound.play().catch(()=>{});
+}
+
 let blocks = [];
 
 let score = 0;
@@ -30,7 +52,10 @@ let goalTimer = 10;
 
 function newGoal(){
 
-goal = Math.floor(Math.random() * 21) - 10;
+do {
+  goal = Math.floor(Math.random() * 21) - 10;
+} while (goal === 0);
+
 currentSum = 0;
 goalTimer = 10;
 
@@ -40,6 +65,10 @@ document.getElementById("goal").textContent = goal;
 document.getElementById("goalText").textContent = goal;
 document.getElementById("timer").textContent = goalTimer;
 document.getElementById("iq").textContent = player.iq;
+
+goalFlash.active = true;
+goalFlash.alpha = 1;
+goalFlash.scale = 1.8;
 
 }
 
@@ -72,7 +101,7 @@ y: -30,
 width: 28,
 height: 28,
 op: op,
-speed: 2 + score * 0.0,
+speed: 2 + Math.sqrt(score) * 0.3,
 hit:false
 });
 
@@ -100,6 +129,8 @@ document.getElementById("iq").textContent = currentSum;
 /* check goal */
 
 if(currentSum === goal){
+	
+playSound(sfx.goal);
 
 score++;
 document.getElementById("score").textContent = score;
@@ -121,6 +152,8 @@ let dashCooldown = false;
 function dash(){
 
 if(dashCooldown) return;
+
+playSound(sfx.dash);
 
 dashCooldown = true;
 
@@ -188,11 +221,21 @@ player.y + player.height > block.y
 ){
 
 applyOperation(block.op);
+playSound(sfx.pickup);
 
 blocks.splice(i,1);
 
 }
 
+}
+
+if(goalFlash.active){
+goalFlash.alpha -= 0.03;   // fade speed
+goalFlash.scale -= 0.01;   // shrink effect
+
+if(goalFlash.alpha <= 0){
+goalFlash.active = false;
+}
 }
 
 }
@@ -248,6 +291,72 @@ block.y + block.height/2
 );
 
 });
+/* ================= DANGER OVERLAY ================= */
+
+if(goalTimer <= 5){
+
+let intensity = (5 - goalTimer) / 5; 
+// 0 → normal, 1 → full merah
+
+ctx.save();
+
+ctx.fillStyle = `rgba(255, 0, 0, ${0.3 * intensity})`;
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+ctx.restore();
+}
+
+
+/* ================= HUD BOTTOM ================= */
+
+let hudHeight = 40;
+
+// background bar
+ctx.fillStyle = "rgba(0,0,0,0.6)";
+ctx.fillRect(0, canvas.height - hudHeight, canvas.width, hudHeight);
+
+// text
+ctx.fillStyle = "white";
+ctx.font = "14px Inter";
+ctx.textAlign = "center";
+
+// posisi horizontal dibagi 4
+let section = canvas.width / 4;
+
+ctx.fillText("Time: " + goalTimer, section * 0.5, canvas.height - 15);
+ctx.fillText("Goal: " + goal, section * 1.5, canvas.height - 15);
+ctx.fillText("" + currentSum, section * 2.5, canvas.height - 15);
+ctx.fillText("Score: " + score, section * 3.5, canvas.height - 15);
+
+ctx.strokeStyle = "#6366f1";
+ctx.beginPath();
+ctx.moveTo(0, canvas.height - hudHeight);
+ctx.lineTo(canvas.width, canvas.height - hudHeight);
+ctx.stroke();
+
+/* animasi goal */
+if(goalFlash.active){
+
+ctx.save();
+
+ctx.globalAlpha = goalFlash.alpha;
+
+ctx.fillStyle = "white";
+ctx.font = `${80 * goalFlash.scale}px Inter`;
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+ctx.shadowColor = "blue";
+ctx.shadowBlur = 20;
+
+ctx.fillText(
+goal,
+canvas.width / 2,
+canvas.height / 2
+);
+
+ctx.restore();
+}
+
 
 /* game over */
 
@@ -255,7 +364,16 @@ if(gameOver){
 
 ctx.fillStyle="red";
 ctx.font="28px Arial";
-ctx.fillText("GAME OVER",110,250);
+ctx.fillStyle = "red";
+ctx.font = "28px Arial";
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+
+ctx.fillText(
+  "GAME OVER",
+  canvas.width / 2,
+  canvas.height / 2
+);
 
 }
 
@@ -347,6 +465,7 @@ spawnBlock();
 /* ================= MOBILE BUTTON CONTROLS ================= */
 
 const leftBtn = document.getElementById("leftBtn");
+const dashBtn = document.getElementById("dashBtn");
 const rightBtn = document.getElementById("rightBtn");
 
 leftBtn.addEventListener("touchstart", () => {
@@ -365,6 +484,18 @@ rightBtn.addEventListener("touchend", () => {
 moveRight = false;
 });
 
+dashBtn.addEventListener("touchstart", () => {
+dash();
+});
+
+dashBtn.addEventListener("mousedown", () => {
+dash();
+});
+
+dashBtn.addEventListener("touchend", (e) => {
+e.preventDefault();
+});
+
 /* optional mouse */
 
 leftBtn.addEventListener("mousedown", () => moveLeft = true);
@@ -379,3 +510,43 @@ if(["ArrowDown","ArrowUp","ArrowLeft","ArrowRight","Space"].includes(e.code)){
 e.preventDefault();
 }
 }, false);
+
+let audioUnlocked = false;
+
+function unlockAudio(){
+if(audioUnlocked) return;
+audioUnlocked = true;
+
+Object.values(sfx).forEach(s => {
+s.play().then(() => {
+s.pause();
+s.currentTime = 0;
+}).catch(()=>{});
+});
+}
+
+/* trigger dari berbagai input */
+document.addEventListener("keydown", unlockAudio, { once: true });
+document.addEventListener("touchstart", unlockAudio, { once: true });
+document.addEventListener("mousedown", unlockAudio, { once: true });
+
+const rulesBtn = document.getElementById("rulesBtn");
+const rulesModal = document.getElementById("rulesModal");
+
+rulesBtn.addEventListener("click", () => {
+rulesModal.style.display = "flex";
+});
+
+rulesModal.addEventListener("click", () => {
+rulesModal.style.display = "none";
+});
+
+rulesBtn.addEventListener("click", () => {
+rulesModal.style.display = "flex";
+gameOver = true; // pause
+});
+
+rulesModal.addEventListener("click", () => {
+rulesModal.style.display = "none";
+gameOver = false;
+});
