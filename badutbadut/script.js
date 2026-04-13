@@ -277,3 +277,26 @@ alert("Game Over! Score: " + score);
 // 🚀 INIT
 initObstacles();
 loop();
+
+
+
+const rulesBtn = document.getElementById("rulesBtn");
+const rulesModal = document.getElementById("rulesModal");
+
+rulesBtn.addEventListener("click", () => {
+rulesModal.style.display = "flex";
+});
+
+rulesModal.addEventListener("click", () => {
+rulesModal.style.display = "none";
+});
+
+rulesBtn.addEventListener("click", () => {
+rulesModal.style.display = "flex";
+gameRunning = false; // pause
+});
+
+rulesModal.addEventListener("click", () => {
+rulesModal.style.display = "none";
+gameRunning = true;
+});

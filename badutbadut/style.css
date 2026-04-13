@@ -90,3 +90,26 @@ canvas {
 background: #020617;
 border-radius: 10px;
 }
+
+.hud-rules {
+	text-align:center;
+}
+
+#rulesModal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:200;
+}
+
+#rulesModal img{
+max-width:90%;
+max-height:90%;
+border-radius:10px;
+}
